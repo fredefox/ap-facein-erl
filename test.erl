@@ -4,12 +4,18 @@
 
 % Start the server
 test00() ->
-	facein:start(42).
+	case facein:start(42) of
+		{ok, _} -> true;
+		_ -> false
+	end.
 
 % Get empty list of friends
 test01() ->
 	{ok, Pid} = facein:start(42),
-	facein:friends(Pid).
+	case facein:friends(Pid) of
+		[] -> true;
+		_ -> false
+	end.
 
 % Test `add_friend`
 test02() ->
