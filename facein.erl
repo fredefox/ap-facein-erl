@@ -38,12 +38,12 @@ serve(Id, Friends) ->
 			   R > 0 ->
 				   % loop through friends and send message
 				   %
-				   % TODO: We might have actually already broadcast this message.
-				   % Consider the sample graph in the case where Susan has
-				   % broadcast some message with radius >3. She will then later
-				   % receive a message from Andrzej and Jen with the same
-				   % message and the radius 2 less. She should ideally only
-				   % forward one of these messages.
+				   % TODO: We might have actually already broadcast this
+				   % message.  Consider the sample graph in the case where
+				   % Susan has broadcast some message with radius >3. She will
+				   % then later receive a message from Andrzej and Jen with the
+				   % same message and the radius 2 less. She should ideally
+				   % only forward one of these messages.
 				   Broadcast = fun(Friend) -> Friend ! {broadcast, M, R-1} end,
 				   lists:map(Broadcast, gb_trees:keys(Friends))
 			end;
