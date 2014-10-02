@@ -13,7 +13,7 @@ serve(Id, Friends) ->
 	receive
 		% TODO
 		{Pid, get_friends} ->
-			Pid ! {self(), Friends},
+			Pid ! {self(), gb_trees:to_list(Friends)},
 			serve(Id, Friends);
 		{Pid, {add_friend, F}} ->
 			Name = request(F, get_name),
