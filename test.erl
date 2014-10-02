@@ -36,3 +36,28 @@ test03() ->
 		[{_SomePid, 1337}] -> true;
 		_ -> false
 	end.
+
+% The sample graph.
+test04() ->
+	{ok, Ken} = facein:start(ken),
+	{ok, Andrzej} = facein:start(andrzej),
+	{ok, Susan} = facein:start(susan),
+	{ok, Reed} = facein:start(reed),
+	{ok, Jessica} = facein:start(jessica),
+	{ok, Jen} = facein:start(jen),
+	{ok, Tony} = facein:start(tony),
+	facein:add_friend(Ken, Andrzej),
+	facein:add_friend(Andrzej, Ken),
+	facein:add_friend(Andrzej, Susan),
+	facein:add_friend(Susan, Andrzej),
+	facein:add_friend(Susan, Jen),
+	facein:add_friend(Susan, Jessica),
+	facein:add_friend(Susan, Reed),
+	facein:add_friend(Jen, Susan),
+	facein:add_friend(Jen, Jessica),
+	facein:add_friend(Jen, Tony),
+	facein:add_friend(Jessica, Jen),
+	facein:add_friend(Reed, Tony),
+	facein:add_friend(Reed, Jessica),
+
+	facein:broadcast(Ken, blabla, 42).
