@@ -13,6 +13,14 @@ serve(Id, Friends) ->
 	receive
 		% TODO
 		{Pid, get_friends} ->
+			% This does not follow specification. It does indeed return a list
+			% of two-tuples, but the tuples are reversed. They should be:
+			%
+			%     {Id, Pid}
+			%
+			% But are in fact:
+			%
+			%     {Pid, Id}
 			Pid ! {self(), gb_trees:to_list(Friends)},
 			serve(Id, Friends);
 		{Pid, {add_friend, F}} ->
