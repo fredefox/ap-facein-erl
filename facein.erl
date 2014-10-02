@@ -32,9 +32,7 @@ serve(Id, Friends) ->
 		{Pid, get_name} ->
 			Pid ! {self(), Id},
 			serve(Id, Friends);
-		{Pid, {broadcast, M, R}} ->
-			% TODO: This function should not wait for the other to return
-			% (which it does currently). I.e.: Use `Pid`.
+		{broadcast, M, R} ->
 			if R == 0 -> [];
 			   R > 0 ->
 				   % loop through friends and send message
@@ -47,7 +45,8 @@ serve(Id, Friends) ->
 				   % only forward one of these messages.
 				   Broadcast = fun(Friend) -> Friend ! {broadcast, M, R-1} end,
 				   lists:map(Broadcast, gb_trees:keys(Friends))
-			end;
+			end,
+			serve(Id, Friends);
 		{Pid, get_messages} -> throw(undefined)
 	end.
 
@@ -72,7 +71,7 @@ friends(P) -> request(P, get_friends).
 %
 % d) `broadcast/3`
 %
-broadcast(P, M, R) -> request(P, {broadcast, M, R}).
+broadcast(P, M, R) -> P ! {broadcast, M, R}.
 
 %
 % e) `received_messages/1`
