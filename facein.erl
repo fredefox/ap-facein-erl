@@ -30,7 +30,8 @@ serve(Id, Friends) ->
 			Pid ! {self(), ok},
 			serve(Id, NewFriends);
 		{Pid, get_name} ->
-			Pid ! {self(), Id};
+			Pid ! {self(), Id},
+			serve(Id, Friends);
 		{Pid, {broadcast, M, R}} ->
 			% TODO: This function should not wait for the other to return
 			% (which it does currently). I.e.: Use `Pid`.
