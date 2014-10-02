@@ -18,9 +18,9 @@ serve(Id, Friends) ->
 		{Pid, {add_friend, F}} ->
 			Name = request(F, get_name),
 			% TODO: runtime error occurs here if `Friends` contain F
-			F = gb_sets:enter(F, Name, Friends),
+			NewFriends = gb_trees:enter(F, Name, Friends),
 			Pid ! {self(), ok},
-			serve(Id, F);
+			serve(Id, NewFriends);
 		{Pid, get_name} ->
 			Pid ! {self(), Id};
 		{Pid, {broadcast, M, R}} ->
