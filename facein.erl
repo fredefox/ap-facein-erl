@@ -1,6 +1,5 @@
 -module(facein).
 -export([start/1, add_friend/2, friends/1, broadcast/3, received_messages/1]).
-%-export(your stuff here).
 
 %
 % a) `start/1`
@@ -14,19 +13,19 @@ serve(Id, Friends) ->
 	receive
 		% TODO
 		{Pid, get_friends} ->
-			Pid ! {Pid, Friends},
+			Pid ! {self(), Friends},
 			serve(Id, Friends);
 		{Pid, {add_friend, F}} ->
 			Name = request(F, get_name),
 			% TODO: runtime error occurs here if `Friends` contain F
 			F = gb_sets:enter(F, Name, Friends),
-			Pid ! {Pid, ok},
+			Pid ! {self(), ok},
 			serve(Id, F);
 		{Pid, get_name} ->
-			Pid ! {Pid, Id};
+			Pid ! {self(), Id};
 		{Pid, {broadcast, M, R}} ->
-			% TODO: This function should not wait for the other to return (which it
-			% does currently). I.e.: Use `Pid`.
+			% TODO: This function should not wait for the other to return
+			% (which it does currently). I.e.: Use `Pid`.
 			if R == 0 -> [];
 			   R > 0 ->
 				   % loop through friends and send message
