@@ -21,6 +21,18 @@ test01() ->
 test02() ->
 	{ok, P} = facein:start(42),
 	{ok, Q} = facein:start(1337),
+	case facein:add_friend(P, Q) of
+		ok -> true;
+		_ -> false
+	end.
+
+% Test `friends` more.
+test03() ->
+	{ok, P} = facein:start(42),
+	{ok, Q} = facein:start(1337),
 	facein:add_friend(P, Q),
 	% P should now be friends with Q aka 1337.
-	facein:friends(P).
+	case facein:friends(P) of
+		[{_SomePid, 1337}] -> true;
+		_ -> false
+	end.
