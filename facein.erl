@@ -5,10 +5,10 @@
 % a) `start/1`
 %
 start(Id) ->
-		Pid = spawn(fun() -> serve(Id, gb_sets:empty()) end),
+		Pid = spawn(fun() -> serve(Id, gb_trees:empty(), gb_trees:empty()) end),
 		{ok, Pid}.
 
-serve(Id, Friends) ->
+serve(Id, Friends, Msgs) ->
 	% Server-implementation of all responses.
 	receive
 		% TODO
@@ -22,16 +22,16 @@ serve(Id, Friends) ->
 			%
 			%     {Pid, Id}
 			Pid ! {self(), gb_trees:to_list(Friends)},
-			serve(Id, Friends);
+			serve(Id, Friends, Msgs);
 		{Pid, {add_friend, F}} ->
 			Name = request(F, get_name),
 			% TODO: runtime error occurs here if `Friends` contain F
 			NewFriends = gb_trees:enter(F, Name, Friends),
 			Pid ! {self(), ok},
-			serve(Id, NewFriends);
+			serve(Id, NewFriends, Msgs);
 		{Pid, get_name} ->
 			Pid ! {self(), Id},
-			serve(Id, Friends);
+			serve(Id, Friends, Msgs);
 		{broadcast, M, R} ->
 			if R == 0 -> [];
 			   R > 0 ->
@@ -46,7 +46,7 @@ serve(Id, Friends) ->
 				   Broadcast = fun(Friend) -> Friend ! {broadcast, M, R-1} end,
 				   lists:map(Broadcast, gb_trees:keys(Friends))
 			end,
-			serve(Id, Friends);
+			serve(Id, Friends, Msgs);
 		{Pid, get_messages} -> throw(undefined)
 	end.
 
