@@ -1,16 +1,6 @@
 -module(facein).
--export([start/1, add_friend/2, friends/1, broadcast/3, received_messages/1]).
 
-%
-% a) `start/1`
-%
-% start(N) starts a new person server for a person with the name N (a string,
-% for instance). The function returns {ok,Pid}, where Pid is the
-% process ID of the new person server.
-%
-start(Id) ->
-		Pid = spawn(fun() -> serve(Id, gb_trees:empty(), gb_trees:empty()) end),
-		{ok, Pid}.
+-export([start/1, add_friend/2, friends/1, broadcast/3, received_messages/1]).
 
 %
 %     Person-server
@@ -18,6 +8,7 @@ start(Id) ->
 % This function is the implementation of a "Person-Server". Each clause in the
 % outer-most `receive`-statement corresponds to a function this library
 % exports.
+%
 serve(Id, Friends, Msgs) ->
 	% Server-implementation of all responses.
 	receive
@@ -81,6 +72,17 @@ request(Pid, Request) ->
 	end.
 
 %
+%
+% a) `start/1`
+%
+% start(N) starts a new person server for a person with the name N (a string,
+% for instance). The function returns {ok,Pid}, where Pid is the
+% process ID of the new person server.
+%
+start(Id) ->
+		Pid = spawn(fun() -> serve(Id, gb_trees:empty(), gb_trees:empty()) end),
+		{ok, Pid}.
+
 %     b) `add_friend/2`
 %
 % `add_friend(P, F)` adds `F` to `P`’s friend list. The person server `P`
