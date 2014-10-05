@@ -38,7 +38,7 @@ The code is annoted with comments and there is one comment-block corresponding t
 %
 ```
 
-One helper-function representing the synchrnous message-passing protocol is supplied as well as one function acting as the Person Server.
+One helper-function representing the synchronous message-passing protocol is supplied as well as one function acting as the Person Server.
 
 ### Tests
 The tests are included in `test.erl`. The results of all the tests can seen by doing:
@@ -47,15 +47,15 @@ The tests are included in `test.erl`. The results of all the tests can seen by d
 c(facein), c(test), test:test_all().
 ```
 
-In an interactive erlang-session. Test-cases arae likewise annoted with comments.
+In an interactive erlang-session. Test-cases are likewise annoted with comments.
 
 ## Code-review
-First the overall structure of the code will be presented and then the implementation-detais of one of the functions will be presented.
+First the overall structure of the code will be presented and then the implementation-details of one of the functions will be presented.
 
 All code-samples are taken directly from the source stripped of comments and blank lines.
 
 ### Overall structure
-The code is structuered so that first the function is the one defining a Person Server's operation. Each clause in the outer-most `receive`-statement (with one exception) is the server-implementation corresponding to some client-side function. These client-side functions are the ones this module exports. All of these follow a very simple synchrnous message-passing protocol which is defined in the function `request/2`:
+The code is structuered so that first the function is the one defining a Person Server's operation. Each clause in the outer-most `receive`-statement (with one exception) is the server-implementation corresponding to some client-side function. These client-side functions are the ones this module exports. All of these follow a very simple synchronous message-passing protocol which is defined in the function `request/2`:
 
 ```erlang
 request(Pid, Request) ->
@@ -113,12 +113,12 @@ It's (server-side) definition looks like this:
 	end;
 ```
 
-A client send a request to the person server by issuing the `init_broadcast`-command. This call is synchronous. This just means that the server reports that it has successfully received the command and has commenced the broadcast. The server will thus respond before the broadcast finnishes.
+A client sends a request to the person server by issuing the `init_broadcast`-command. This call is synchronous. This just means that the server reports that it has successfully received the command and has commenced the broadcast. The server will thus respond before the broadcast finnishes.
 
-The server then sends a message to itself. That is, the first actual broadcast. The server then checks if the radius is greater than zero in which case it continues the broadcast by mapping the locally defined function `Broadcast` over all its friends - the list returned by `gb_trees:keys`.
+The server then sends a message to itself. That is, the first actual broadcast. The server then checks if the radius is greater than zero in which case it continues the broadcast by mapping the locally defined function `Broadcast` over all its friends - the list returned by `gb_trees:keys`. In any case the message is stored in the thread with `gb_trees:enter(Ref, M, Msgs)`.
 
 ## Tests
-The minimal testing described in the specification has been performed on the sample graph and can be found in `test.erl`. One thing to note about the tests is that it can be tricky to automate tests for an asynchrnous method like `broadcast` since there is no way of knowing when the broadcast finnishes and thus we can not know if issuing a `received_messages` will reflect the final state. To alleviate this a `sleep`-statement has been inserted. Please note that this will not ensure that the tests returns the desired results. Really the valid results of doing a `received_messages` is any subset of the messages that should at some point return to any given node. See the comments in the test-suite for further details.
+The minimal testing described in the specification has been performed on the sample graph and can be found in `test.erl`. One thing to note about the tests is that it can be tricky to automate tests for an asynchronous method like `broadcast` since there is no way of knowing when the broadcast finnishes and thus we can not know if issuing a `received_messages` will reflect the final state. To alleviate this a `sleep`-statement has been inserted. Please note that this will not ensure that the tests returns the desired results. Really the valid results of doing a `received_messages` is any subset of the messages that should at some point return to any given node. See the comments in the test-suite for further details.
 
 # Conclusion
 In this report my efforts to implement the Face In library was presented. The library handles asynchronous and synchronous message-passing in a distributed network. The test-cases have been run with success although they are not entirely robust in the sense that they might give false negatives.
