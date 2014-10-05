@@ -62,7 +62,9 @@ serve(Id, Friends, Msgs) ->
 						   serve(Id, Friends, NewMsgs)
 				   end
 			end;
-		{Pid, get_messages} -> throw(undefined)
+		{Pid, get_messages} ->
+			Pid ! {self(), gb_trees:values(Msgs)},
+			serve(Id, Friends, Msgs)
 	end.
 
 % Synchronous requests
