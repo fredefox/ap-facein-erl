@@ -38,7 +38,9 @@ test03() ->
 	end.
 
 % The sample graph.
-test04() ->
+setupGraph() ->
+	% Set up the graph
+	% Add nodes
 	{ok, Ken} = facein:start(ken),
 	{ok, Andrzej} = facein:start(andrzej),
 	{ok, Susan} = facein:start(susan),
@@ -46,6 +48,7 @@ test04() ->
 	{ok, Jessica} = facein:start(jessica),
 	{ok, Jen} = facein:start(jen),
 	{ok, Tony} = facein:start(tony),
+	% Add the edges
 	facein:add_friend(Ken, Andrzej),
 	facein:add_friend(Andrzej, Ken),
 	facein:add_friend(Andrzej, Susan),
@@ -59,5 +62,85 @@ test04() ->
 	facein:add_friend(Jessica, Jen),
 	facein:add_friend(Reed, Tony),
 	facein:add_friend(Reed, Jessica),
+	dict:from_list([
+		{ken, Ken},
+		{andrzej, Andrzej},
+		{susan, Susan},
+		{reed, Reed},
+		{jessica, Jessica},
+		{jen, Jen},
+		{tony, Tony}
+	]).
+% All the tests mentioned in "Minimal testing" is given here
+test04() ->
+	G = setupGraph(),
+	{ok, Jen} = dict:find(jen, G),
+	{ok, Susan} = dict:find(susan, G),
+	{ok, Tony} = dict:find(tony, G),
+	{ok, Jessica} = dict:find(jessica, G),
+	% Jen's friends
+	case facein:friends(Jen) of
+		[{Susan, susan}, {Jessica, jessica}, {Tony, tony}] -> true;
+		X -> X
+	end.
+test05() ->
+	G = setupGraph(),
+	{ok, Jessica} = dict:find(jessica, G),
+	{ok, Ken} = dict:find(ken, G),
+	{ok, Tony} = dict:find(tony, G),
+	% broadcasting
+	facein:broadcast(Jessica, blabla, 2),
+	facein:broadcast(Ken, albalb, 3),
+	% The results of the broadcasts
+	% Really we can't know when (if) she receives this messages
+	% Hopefully 0.1 secs will be enough and she will have received it.
+	timer:sleep(100),
+	case facein:received_messages(Tony) of
+		[{jessica, blabla}] -> true;
+		% Really this should also be valid:
+		%
+		%     [] -> true
+		%
+		_ -> false
+	end.
+test06() ->
+	G = setupGraph(),
+	{ok, Jessica} = dict:find(jessica, G),
+	{ok, Ken} = dict:find(ken, G),
+	{ok, Susan} = dict:find(susan, G),
+	% broadcasting
+	facein:broadcast(Jessica, blabla, 2),
+	facein:broadcast(Ken, albalb, 3),
+	% As above we can't know how much time will pass.
+	timer:sleep(100),
+	% Here we also can not know from whom she receives the message first.
+	case facein:received_messages(Susan) of
+		[{jessica, blabla}, {ken, albalb}] -> true;
+		[{ken, albalb}, {jessica, blabla}] -> true;
+		% ... and again any subsets of this would also strictly speaking be ok
+		_ -> false
+	end.
+test07() ->
+	G = setupGraph(),
+	{ok, Jessica} = dict:find(jessica, G),
+	{ok, Ken} = dict:find(ken, G),
+	{ok, Reed} = dict:find(reed, G),
+	% broadcasting
+	facein:broadcast(Jessica, blabla, 2),
+	facein:broadcast(Ken, albalb, 3),
+	% The results of the broadcasts
+	timer:sleep(100),
+	case facein:received_messages(Reed) of
+		[{ken, albalb}] -> true;
+		_ -> false
+	end.
 
-	facein:broadcast(Ken, blabla, 42).
+test_all() -> [
+	test01(),
+	test02(),
+	test03(),
+	test04(),
+	test05(),
+	test06(),
+	test07()
+	].
