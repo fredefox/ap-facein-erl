@@ -32,11 +32,12 @@ serve(Id, Friends, Msgs) ->
 		{Pid, get_name} ->
 			Pid ! {self(), Id},
 			serve(Id, Friends, Msgs);
-		{init_broadcast, M, R} ->
+		{Pid, {init_broadcast, M, R}} ->
 			% `Message` is a tuple with the name of originial broadcaster and
 			% the message
 			Message = {Id, M},
 			self() ! {broadcast, Message, R},
+			Pid ! {self(), ok},
 			serve(Id, Friends, Msgs);
 		{broadcast, M, R} ->
 			{Ref, _} = M,
@@ -88,7 +89,7 @@ friends(P) -> request(P, get_friends).
 %
 % d) `broadcast/3`
 %
-broadcast(P, M, R) -> P ! {init_broadcast, M, R}.
+broadcast(P, M, R) -> request(P, {init_broadcast, M, R}).
 
 %
 % e) `received_messages/1`
