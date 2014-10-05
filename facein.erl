@@ -91,7 +91,7 @@ request(Pid, Request) ->
 
 %
 %
-% a) `start/1`
+%     a) `start/1`
 %
 % start(N) starts a new person server for a person with the name N (a string,
 % for instance). The function returns {ok,Pid}, where Pid is the
