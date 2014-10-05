@@ -4,10 +4,20 @@
 %
 % a) `start/1`
 %
+% start(N) starts a new person server for a person with the name N (a string,
+% for instance). The function returns {ok,Pid}, where Pid is the
+% process ID of the new person server.
+%
 start(Id) ->
 		Pid = spawn(fun() -> serve(Id, gb_trees:empty(), gb_trees:empty()) end),
 		{ok, Pid}.
 
+%
+%     Person-server
+%
+% This function is the implementation of a "Person-Server". Each clause in the
+% outer-most `receive`-statement corresponds to a function this library
+% exports.
 serve(Id, Friends, Msgs) ->
 	% Server-implementation of all responses.
 	receive
@@ -20,6 +30,7 @@ serve(Id, Friends, Msgs) ->
 			% But are in fact:
 			%
 			%     {Pid, Id}
+			%
 			Pid ! {self(), gb_trees:to_list(Friends)},
 			serve(Id, Friends, Msgs);
 		{Pid, {add_friend, F}} ->
@@ -57,7 +68,12 @@ serve(Id, Friends, Msgs) ->
 			serve(Id, Friends, Msgs)
 	end.
 
-% Synchronous requests
+%
+%     Synchronous requests
+%
+% This function defines the simple protocol for interacting with the
+% person-servers
+%
 request(Pid, Request) ->
 	Pid ! {self(), Request},
 	receive
@@ -65,22 +81,42 @@ request(Pid, Request) ->
 	end.
 
 %
-% b) `add_friend/2`
+%     b) `add_friend/2`
+%
+% `add_friend(P, F)` adds `F` to `P`’s friend list. The person server `P`
+% contacts `F` to get the name of the friend and then stores that information.
+% `F` is the process ID of a thread running a person-server. The function
+% returns `ok` on success.
 %
 add_friend(P, F) ->
 	request(P, {add_friend, F}).
 
 %
-% c) `friends/1`
+%     c) `friends/1`
+%
+% `friends(P)` returns a list of friends for the person. The result is a list
+% of pairs, where the first component is the name of the friend and the second
+% is a process ID for the friend’s person server.
+%
+% TODO: The tuples are reversed.
 %
 friends(P) -> request(P, get_friends).
 
 %
-% d) `broadcast/3`
+%     d) `broadcast/3`
+%
+% `broadcast(P, M, R)` sends the message `M` (any term) to all friends within a
+% radius R (an integer) of P. This function is non-blocking, hence it can
+% return before the message has reached all friends.
 %
 broadcast(P, M, R) -> request(P, {init_broadcast, M, R}).
 
 %
-% e) `received_messages/1`
+%     e) `received_messages/1`
+%
+% `received_messages(P)` returns a list of all messages received by `P`. The
+% list is a list of pairs of terms, where the first is the name of the original
+% person who broadcasted the message and the second term is the message
+% broadcasted.
 %
 received_messages(P) -> request(P, get_messages).
