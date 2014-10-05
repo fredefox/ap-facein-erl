@@ -40,12 +40,13 @@ serve(Id, Friends, Msgs) ->
 			serve(Id, Friends, Msgs);
 		{broadcast, M, R} ->
 			{Ref, _} = M,
-			if R == 0 -> serve(Id, Friends, Msgs);
+			NewMsgs = gb_trees:enter(Ref, M, Msgs),
+			if R == 0 -> serve(Id, Friends, NewMsgs);
 			   R > 0 ->
 				   case gb_trees:is_defined(Ref, Msgs) of
-					   true -> serve(Id, Friends, Msgs);
+					   true ->
+						   serve(Id, Friends, NewMsgs);
 					   _ ->
-						   NewMsgs = gb_trees:enter(Ref, M, Msgs),
 						   % loop through friends and send message
 						   %
 						   % TODO: We might have actually already broadcast
