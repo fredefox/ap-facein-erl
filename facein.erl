@@ -32,21 +32,35 @@ serve(Id, Friends, Msgs) ->
 		{Pid, get_name} ->
 			Pid ! {self(), Id},
 			serve(Id, Friends, Msgs);
-		{broadcast, M, R} ->
-			if R == 0 -> [];
-			   R > 0 ->
-				   % loop through friends and send message
-				   %
-				   % TODO: We might have actually already broadcast this
-				   % message.  Consider the sample graph in the case where
-				   % Susan has broadcast some message with radius >3. She will
-				   % then later receive a message from Andrzej and Jen with the
-				   % same message and the radius 2 less. She should ideally
-				   % only forward one of these messages.
-				   Broadcast = fun(Friend) -> Friend ! {broadcast, M, R-1} end,
-				   lists:map(Broadcast, gb_trees:keys(Friends))
-			end,
+		{init_broadcast, M, R} ->
+			% `Message` is a tuple with the name of originial broadcaster and
+			% the message
+			Message = {Id, M},
+			self() ! {broadcast, Message, R},
 			serve(Id, Friends, Msgs);
+		{broadcast, M, R} ->
+			{Ref, _} = M,
+			if R == 0 -> serve(Id, Friends, Msgs);
+			   R > 0 ->
+				   case gb_trees:is_defined(Ref, Msgs) of
+					   true -> serve(Id, Friends, Msgs);
+					   _ ->
+						   NewMsgs = gb_trees:enter(Ref, M, Msgs),
+						   % loop through friends and send message
+						   %
+						   % TODO: We might have actually already broadcast
+						   % this message. Consider the sample graph in the
+						   % case where Susan has broadcast some message with
+						   % radius >3. She will then later receive a message
+						   % from Andrzej and Jen with the same message and the
+						   % radius 2 less. She should ideally only forward one
+						   % of these messages.
+						   Broadcast =
+						       fun(Friend) -> Friend ! {broadcast, M, R-1} end,
+						   lists:map(Broadcast, gb_trees:keys(Friends)),
+						   serve(Id, Friends, NewMsgs)
+				   end
+			end;
 		{Pid, get_messages} -> throw(undefined)
 	end.
 
@@ -71,7 +85,7 @@ friends(P) -> request(P, get_friends).
 %
 % d) `broadcast/3`
 %
-broadcast(P, M, R) -> P ! {broadcast, M, R}.
+broadcast(P, M, R) -> P ! {init_broadcast, M, R}.
 
 %
 % e) `received_messages/1`
