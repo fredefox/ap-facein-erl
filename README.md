@@ -1,4 +1,4 @@
-# Advanced Programming Assigmnet 2
+# Advanced Programming Assigmnet 5
 
 Written by Frederik Hanghøj Iversen
 for the course Advanced Programming
@@ -28,7 +28,7 @@ In an interactive erlang-session.
 
 The code is annoted with comments and there is one comment-block corresponding to each bullet in the sspecification. The comments are slight variations of the ones given in the specification. E.g.: 
 
-```erlng%
+```erlang
 %
 %     a) `start/1`
 %
@@ -85,7 +85,7 @@ add_friend(P, F) -> request(P, {add_friend, F}).
 
 The real implementation-details are on the server-side of things.
 
-### `broadcast`
+### Broadcast
 Perhaps the most interesting method-implementation is `broadcast`. Here I will explain the server-side implementaiton of this method.
 
 It's (server-side) definition looks like this:

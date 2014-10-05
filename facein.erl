@@ -90,7 +90,6 @@ request(Pid, Request) ->
 	end.
 
 %
-%
 %     a) `start/1`
 %
 % `start(N)` starts a new person server for a person with the name `N` (a
@@ -109,8 +108,7 @@ start(Id) ->
 % `F` is the process ID of a thread running a person-server. The function
 % returns `ok` on success.
 %
-add_friend(P, F) ->
-	request(P, {add_friend, F}).
+add_friend(P, F) -> request(P, {add_friend, F}).
 
 %
 %     c) `friends/1`
